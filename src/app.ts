@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { NextFunction } from 'express';
 import cors from'cors';
 import logger from './config/logger';
+import { IncomingMessage, ServerResponse } from 'http';
+import { pool } from './config/db';
 
 
 
@@ -45,7 +47,11 @@ app.use(express.json({
 /**
  * API ROUTES
  */
-
+  app.get("/",async (req: IncomingMessage, res, next: NextFunction)=>{
+    const queryResult = await pool.query("SELECT * FROM users");
+    const rows = queryResult.rows
+    res.status(200).json(rows)
+  })
 
 
 /**
