@@ -1,4 +1,4 @@
-import path from "path";
+import path, { dirname } from "path";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
@@ -7,10 +7,14 @@ const {combine, printf, colorize, timestamp, json, errors} = winston.format
 
 //Log format
 const logFormat = printf(({message, timestamp, level, stack, ...meta})=>{
-  let log = `[${timestamp}] [${level}]: [${message}]`
+
+  const baseLayer = `${process.env.APP_NAME?.toLocaleUpperCase()}\\src\\app.ts`
+
+  const layer = Object.keys(meta).length > 0 ? `${baseLayer}\\modules\\${meta.layer}` : baseLayer
+
+  let log = `[${timestamp}] [${layer}] [${level}]: ${message}`
 
   if(stack) log += `\n${stack}`
-  if(Object.keys(meta).length > 0) log  += `\n${JSON.stringify(meta, null, 2)}`
 
   return log
 })
@@ -28,7 +32,8 @@ const transports: winston.transport[] = [
       timestamp({format: "DD/MM/YYYY HH:mm:ss"}),
       errors({stack: true}),
       logFormat
-    )
+    ),
+
   })
 ]
 
@@ -60,9 +65,9 @@ if(process.env.NODE_ENV === "production")
 }
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || (process.env.LOG_LEVEL === "prodcution" ? "info": "debug"),
+  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === "prodcution" ? "info": "debug"),
   transports,
-  exitOnError: false
+  exitOnError: false,
 })
 
 export default logger
