@@ -20,7 +20,7 @@
         .Typescript
         .Express js
         .Postgres SQL 18
-        .PG driver, pas d'ORM
+        .Prisma 6
         .Zod pour la validation des donnees
         .JWT pour l'auth
         
