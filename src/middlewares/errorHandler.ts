@@ -17,68 +17,50 @@ export class AppError extends Error
 }
 
 
-export const errorHandler = (
-  err: Error | AppError,
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
+export const errorHandler = (err: Error, req: Request, res: Response, next:NextFunction) =>{
+  let statusCode = 500;
+  let errorMessage = "Internal Server Error";
+  let errors: unknown[] = [];
 
-  let statusCode = 500
-  let message = "Une erreur interne est survenue."
-  let errors: unknown[] = []
+  if(err instanceof AppError)
+  {
+    statusCode = err.statusCode;
+    errorMessage = err.message
 
-  if (err instanceof AppError) {
-
-    statusCode = err.statusCode
-    message = err.message
-
-    if (statusCode < 500) {
-      
-      logger.warn(`[${req.method}] ${req.path}: ${statusCode}: ${message}`)
-    } else {
-
-      logger.error(`[${req.method}] ${req.path} ${statusCode} ${message}`, {
-        stack: err.stack
-      })
+    if(statusCode < 500)
+    {
+      logger.warn(`${req.method}/${req.path}: [${statusCode}] [${errorMessage}]`);
+    }
+    else 
+    {
+      logger.error(`${req.method}/${req.path}: [${statusCode}] [${errorMessage}]`);
     }
   }
+  else if (err instanceof ZodError)
+  {
+    statusCode = 400;
+    errorMessage ="Bad request: Validation Error";
 
+    errors = err.issues.map(e =>({
+      field: e.path.join("."),
+      message: e.message
+    }));
+
+    logger.warn(`${req.method}/${req.path}: [${statusCode}][${errorMessage}]`)
+  }
   else {
 
-  
-    if (err instanceof ZodError) {
-      statusCode = 400
-      message = "Erreur de validation"
-
-      errors = err.issues.map((e: any) => ({
-        field: e.path.join("."),
-        message: e.message
-      })) || []
-    }
-
-
-    
-    else {
-      logger.error(`Unhandled error: ${err.message}`, {
-        stack: err.stack
-      })
-    }
+      errorMessage = err.message
+      errors.push(err.stack)
+      logger.error(`${req.method}/${req.path}:  [${statusCode}] [${errorMessage}]`, {stack: err.stack});
   }
 
-  res.status(statusCode).json({
+  res.status(statusCode)
+  .json({
     success: false,
-    message,
-    ...(errors.length > 0 && { errors }),
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+    message: errorMessage,
+    ...(errors.length > 0 && {error: errors})
   })
-}
 
-//not found error
-export const notFound = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): void => {
-  next(new AppError(`Route ${req.originalUrl} introuvable`, 404))
+  next()
 }
