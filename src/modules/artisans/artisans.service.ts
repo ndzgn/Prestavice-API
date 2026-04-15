@@ -1,7 +1,6 @@
 import { Artisans } from "@prisma/client";
-import { CreateArtisanDTO } from "../../models/Artisan";
+import { CreateArtisanDTO, UpdateArtisanDTO } from "../../models/Artisan";
 import { prisma } from "../../config/Prisma";
-import { id } from "zod/locales";
 import { AppError } from "../../middlewares/errorHandler";
 
 
@@ -18,17 +17,33 @@ export const createArtisan = async (data: CreateArtisanDTO): Promise<Artisans> =
     }
   })
 
+  const userFound = await prisma.users.findUnique({
+    where:{
+      id: data.userId
+    }
+  });
+
+   if(!userFound)
+  {
+    throw new AppError("User not found", 404)
+  }
+
+
   if(profileFound){
+    if(profileFound.userId === data.userId){
+      throw new AppError("User already has an artisan profile", 409)
+    }
+
     if(profileFound.email === data.email){
       throw new AppError("Email already in use", 409)
     }
     if(profileFound.phone === data.phone){
       throw new AppError("Phone already in use", 409)
     }
-    if(profileFound.userId === data.userId){
-      throw new AppError("User already has an artisan profile", 409)
-    }
+    
   }
+
+ 
 
   const cleanData = {
     ...data,
@@ -123,7 +138,7 @@ export const findArtisansByService = async (service: string): Promise<Artisans[]
    where:{
     isActive: true,
     AND : {
-      service: service.toLocaleLowerCase().trim()
+      service: service.toLocaleLowerCase().trim(),
     }
    }
   })
@@ -186,17 +201,26 @@ export const findAllActiveArtisans = async (): Promise<Artisans[]> =>{
 
   return profiles
 }
-//update artisan profile
 
-export const updateArtisan = async (artisan_id: string, data: Partial<CreateArtisanDTO>): Promise<Artisans> =>{
+//update artisan profile
+export const updateArtisan = async (artisan_id: string, data: UpdateArtisanDTO): Promise<Artisans> =>{
   await findArtisanById(artisan_id) // on verifie l'existence de l'artisan
 
+
+  const cleanData = {
+    ...data,
+    email: data.email?.toLowerCase().trim(),
+    name: data.name?.trim(),
+    service: data.service?.toLowerCase().trim(),
+    town: data.town?.toLowerCase().trim(),
+    district: data.district?.toLowerCase().trim()
+  }
   const updated = prisma.artisans.update({
     where:{
       id: artisan_id
     },
     data:{
-      ...data,
+      ...cleanData,
       updatedAt: new Date()
     },
   })
