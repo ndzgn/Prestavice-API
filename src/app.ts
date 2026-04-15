@@ -2,8 +2,13 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Response, Request } from 'express';
 import cors from'cors';
 import logger from './config/logger';
-import { pool } from './config/db';
-import usersRoute from "./routes/users.routes"
+
+
+/// on importe les routes ici
+import usersRoutes from "./modules/users/users.routes"
+import artisansRoutes from "./modules//artisans/artisans.routes"
+import { errorHandler} from './middlewares/errorHandler';
+import { requestLogger } from './middlewares/requestLogger';
 
 
 
@@ -32,6 +37,8 @@ app.use(cors(
 // compression middleware
 // cookieParser middleware
 // morgan middleware
+//request logger middleware
+app.use(requestLogger)
 // urlencoded middleware
 // json serializer middleware
 app.use(express.json({
@@ -48,13 +55,14 @@ app.use(express.json({
 /**
  * ----------------------API ROUTES--------------------------
  */
-  app.use("/api/users", usersRoute)
+  app.use("/api/users", usersRoutes)
+  app.use("/api/artisans", artisansRoutes)
 
 /**
  * -------------------------ERROR HANDLING-----------------------
  */
-//notFound
 //errorHandler
+app.use(errorHandler)
 
 /**
  * ---------------------------START SERVER----------------------
