@@ -1,120 +1,160 @@
-import { NextFunction,Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { OfferStatus } from "@prisma/client";
 import * as offerService from "./offer.service";
 import logger from "../../config/logger";
-import { OfferStatus } from "@prisma/client";
+import { AppError } from "../../middlewares/errorHandler";
 
 
+const basePathName = "/api/v1/offers";
 
-const basePathName = "/api/v1/offers"
-// create offer request
-export const createOfferRequest = async (req: Request, res: Response, next: NextFunction) =>{
-  logger.info(`POST ${basePathName}/`, {
-    "ip": req.ip,
-  })
+
+//Create offer 
+
+export const createOfferRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(`POST ${basePathName}`, { ip: req.ip });
 
   try {
-    
-    const offer = await offerService.createOffer(req.body)
-    
+    const offer = await offerService.createOffer(req.body);
+
     res.status(201).json({
       success: true,
-      message: "Offer create with success",
-      data: offer
-    })
-
+      message: "Offer created successfully",
+      data: offer,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 
-//get offer request 
-export const getOfferRequest = async (req:Request, res:Response, next: NextFunction) =>{
-  logger.info(`GET ${basePathName}/:${req.params.id}`, {"ip": req.ip})
+//Get offer by id 
+
+export const getOfferRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(`GET ${basePathName}/${req.params.id}`, { ip: req.ip });
+
   try {
-
     const offer = await offerService.getOffer(req.params.id as string);
 
     res.status(200).json({
       success: true,
-      message: "Offer found",
-      data: offer
-    })
-    
+      message: "Offer fetched successfully",
+      data: offer,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
-// get active offers request
-export const getActiveOffersRequest = async(req: Request, res: Response, next: NextFunction) =>{
-  logger.info(`GET ${basePathName}/`)
+
+//Get all active offers 
+
+export const getActiveOffersRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(`GET ${basePathName}`, { ip: req.ip });
+
   try {
     const offers = await offerService.getActiveOffers();
 
     res.status(200).json({
       success: true,
-      message: `${offers.length} found with success`,
-      data: offers
-    })
-
+      message: `${offers!.length} offer(s) fetched successfully`,
+      data: offers,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 
-// set offer status request
-export const setOfferStatusRequest = async (req: Request, res: Response, next: NextFunction) =>{
-  logger.info(`PATCH ${basePathName}/:${req.params.id}?status=${req.query.status}`)
+//Update offer 
+
+export const updateOfferRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(`PUT ${basePathName}/${req.params.id}`, { ip: req.ip });
 
   try {
-    const offer = await offerService.setOfferStatus(req.params.id as string, req.query.status as OfferStatus)
+    const offer = await offerService.updateOffer(req.params.id as string, req.body);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: `Offer status updated with success`,
-      data: offer
-    })
-
+      message: "Offer updated successfully",
+      data: offer,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 
-export const updateOfferRequest = async (req: Request, res: Response, next: NextFunction)=>{
-  logger.info(`PUT ${basePathName}/`)
+//Set offer status 
+
+export const setOfferStatusRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(
+    `PATCH ${basePathName}/${req.params.id}/status?status=${req.query.status}`,
+    { ip: req.ip }
+  );
 
   try {
-    const offer = await offerService.updateOffer(req.params.id as string, req.body)
+    const status = req.query.status as string;
+    const validStatuses = Object.values(OfferStatus);
 
-    res.status(201).json({
+    if (!validStatuses.includes(status as OfferStatus)) {
+      throw new AppError(
+        `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
+        400
+      );
+    }
+
+    const offer = await offerService.setOfferStatus(
+      req.params.id as string,
+      status as OfferStatus
+    );
+
+    res.status(200).json({
       success: true,
-      message: "Offre mis a jour",
-      data: offer
-    })
+      message: `Offer status updated to ${status} successfully`,
+      data: offer,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
-export const deleteOfferRequest = async (req:Request, res: Response, next: NextFunction)=>{
 
-  logger.info(`DELETE ${basePathName}/`)
+//Delete offer 
+
+export const deleteOfferRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(`DELETE ${basePathName}/${req.params.id}`, { ip: req.ip });
 
   try {
     await offerService.deleteOffer(req.params.id as string);
 
-    res.status(204).json({
-      success: true,
-      message: "Offer deleted with success",
-      
-    })
+    res.status(204).send();
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
-
+};
 
 
