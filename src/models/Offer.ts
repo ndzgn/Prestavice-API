@@ -9,8 +9,16 @@ export const createOfferSchema = z.object({
   district: z.string().max(100),
   phone: z.string().length(9),
   title: z.string().max(100),
-  description: z.string().max(500),
+  description: z.string().max(1000),
   service: z.string().max(100),
+  status: z.enum([
+    "PENDING",
+    "ACCEPTED",
+    "INPROGRESS",
+    "CANCELLED",
+    "COMPLETED",
+    "FAILED"
+  ]).default("PENDING")
 })
 
 export const updateOfferSchema = createOfferSchema.partial().extend({
@@ -24,5 +32,15 @@ export const updateOfferSchema = createOfferSchema.partial().extend({
   ]).optional()
 })
 
+
 export type CreateOfferDTO = z.infer<typeof createOfferSchema>
 export type UpdateOfferDTO = z.infer<typeof updateOfferSchema>
+
+export enum OfferStatus {
+  PENDING,
+  ACCEPTED,
+  INPROGRESS,
+  CANCELLED,
+  COMPLETED,
+  FAILED
+}
