@@ -8,7 +8,7 @@ import logger from './config/logger';
 import usersRoutes from "./modules/users/users.routes"
 import artisansRoutes from "./modules//artisans/artisans.routes"
 import offersRoutes from "./modules/Offer/offer.routes"
-
+import authRoutes from "./modules/auth/auth.routes"
 
 import { errorHandler} from './middlewares/errorHandler';
 import { requestLogger } from './middlewares/requestLogger';
@@ -58,6 +58,7 @@ app.use(express.json({
 /**
  * ----------------------API ROUTES--------------------------
  */
+  app.use("/api/v1/auth", authRoutes)
   app.use("/api/v1/users", usersRoutes)
   app.use("/api/v1/artisans", artisansRoutes)
   app.use("/api/v1/offers", offersRoutes)

@@ -108,25 +108,25 @@ const seed = async ()=>{
     ])
 
     //pour chaque artisan on cree un user
-    for(const data of artisans)
-    {
-        const user = await prisma.users.create({
-            data:{
-                username: data.name,
-                email: data.email,
-                password: faker.internet.password(),
-                role: "ARTISAN"
-            }
-        })
+    // for(const data of artisans)
+    // {
+    //     const user = await prisma.users.create({
+    //         data:{
+    //             username: data.name,
+    //             email: data.email,
+    //             password: faker.internet.password(),
+    //             role: "ARTISAN"
+    //         }
+    //     })
 
 
-        const artisan = await prisma.artisans.create({
-            data:{
-                userId: user.id,
-                ...data
-            }
-        })
-    }
+    //     const artisan = await prisma.artisans.create({
+    //         data:{
+    //             userId: user.id,
+    //             ...data
+    //         }
+    //     })
+    // }
     
 }
 
