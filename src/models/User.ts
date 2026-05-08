@@ -7,7 +7,7 @@ export const createUserSchema = z.object({
   username: z.string({error:"Username is required"}).min(2),
   password: z.string({error:"Password is required"}).min(6),
   pictureUrl: z.string().url().optional(),
-  role: z.enum(["USER", "ADMIN", "ARTISAN"]).optional(),
+  role: z.enum(["USER", "ADMIN", "ARTISAN"]).default("USER"),
 });
 
 export const updateUserSchema = createUserSchema.partial()
@@ -22,3 +22,4 @@ export const toUserResponse = (user: Users): UserResponseDTO =>{
   const {password, ...rest} = user;
   return rest
 }
+

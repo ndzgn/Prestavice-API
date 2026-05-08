@@ -30,6 +30,7 @@ model Users {
   isEmailVerified Boolean         @default(false)
   review          Review[]
   isActive        Boolean         @default(true)
+  refreshToken    String?
   artisan         Artisans? //user in one to one relationship with artisan
   offers          Offers[] // a user can create many missions
   notifications   Notifications[]

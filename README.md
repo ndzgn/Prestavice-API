@@ -24,3 +24,11 @@
         .Zod pour la validation des donnees
         .JWT pour l'auth
         
+## Installation et lancement du projet 
+        . Cloner le projet : ```git clone https://github.com/galandnoah1/Prestavice-API.git```
+        . naviguer dans le dossier ```cd Prestavice-API```
+        . Installer les dependances ```npm install```
+        . Copier le dossier de variables ```cp .env.example .env```
+        . Personnaliser le votre fichier .env
+        . Lancer le projet en mode dev ``` npm run dev ```
+        . Lancer le projet en production ``` npm run start```
