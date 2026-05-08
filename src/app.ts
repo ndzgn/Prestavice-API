@@ -60,7 +60,7 @@ app.use(express.json({
  */
   app.use("/api/v1/users", usersRoutes)
   app.use("/api/v1/artisans", artisansRoutes)
-  app.use("/api/v1/offers")
+  app.use("/api/v1/offers", offersRoutes)
 /**
  * -------------------------ERROR HANDLING-----------------------
  */
